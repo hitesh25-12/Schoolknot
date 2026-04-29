@@ -1,25 +1,35 @@
-name: Run Schoolknot Automation
+name: Run Non-Headless Selenium
 
 on:
-  push:                   # Runs every time you push code
-  workflow_dispatch:      # Allows you to click a "Run" button manually
+  workflow_dispatch:
 
 jobs:
-  build:
+  run-selenium:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        # UPDATE: Change v3 to v6
+        uses: actions/checkout@v6 
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        # UPDATE: Change v4 to v6
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Linux Dependencies
         run: |
-          pip install -r requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y xvfb libxi6 libgconf-2-4
 
-      - name: Run Selenium Script
-        run: python main.py
+      - name: Install Python Dependencies
+        run: pip install selenium webdriver-manager
+
+      - name: Run Selenium with Virtual Screen
+        run: xvfb-run python main.py
+        
+      - name: Upload Screenshot
+        uses: actions/upload-artifact@v6 # UPDATE: Change v4 to v6
+        with:
+          name: selenium-screenshot
+          path: result.png
